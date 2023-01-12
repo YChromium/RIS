@@ -1,0 +1,58 @@
+//LAB 4 EDITED FOR AJAX
+//EDITED FILES ONLY
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All people</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+</head>
+<body>
+<!--Вывод списка людей с помощью thymeleaf + кнопка Delete через Ajax-->
+<div id="context">
+    <div th:each="person : ${people}" th:id="@{person{id}(id=${person.getId()})}">
+        <a th:href="@{/people/{id}(id=${person.getId()})}" th:text="${person.getName()}">user</a>
+        <input type="submit" value="Delete" th:onclick="@{func({id})(id=${person.getId()})}"/>
+    </div>
+</div>
+<br /> <br />
+<!--Создание нового человека-->
+<a href="/people/new">Create new person</a>
+<!--Форма для создания нового человека через Ajax-->
+<form th:method="POST" th:action="@{/people}" th:object="${person}" onsubmit="return create()">
+    <label for="name">Enter name: </label>
+    <input type="text" th:field="*{name}" id="name"/>
+    <br/>
+    <input type="submit" value="Create!"/>
+</form>
+
+<script>
+    //Функция через Ajax для удаления человека из БД, и со страницы
+    function func(id) {
+        $.ajax({
+            url: "/ajax/" + id,
+            success: function (result) {
+                $("#person" + id).remove();
+            }
+        });
+        return false;
+    }
+
+    //Функция через Ajax для добавления человека и его отображения
+    function create() {
+        $.ajax({
+            url: "/create/" + $("#name").val(),
+            success: function (result_id) {
+                $("#context").append("<div id=\"person" + result_id + "\">\n" +
+                    "<a href=\"/people/" + result_id + "\">" + $("#name").val() + "</a>\n" +
+                    "<input type=\"submit\" value=\"Delete\" onClick=\"func(" + result_id + ")\"/>\n" +
+                    "</div>");
+                $("#name").val("");
+            }
+        });
+        return false;
+    }
+</script>
+</body>
+</html>
